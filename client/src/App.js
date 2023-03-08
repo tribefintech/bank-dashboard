@@ -14,8 +14,23 @@ import Main from "./containers/Main";
 import reducer from "./reducers";
 import getThemeConfig from "./theme";
 import useThemeDetector from "./modules/useThemeDetector";
+import { SITE_HOST } from "./config/settings";
 
-const history = createBrowserHistory();
+// check if the app URL is a subdirectory
+// if so, use the subdirectory as the basename for the router
+let directoryPath = SITE_HOST.replace("https://", "").replace("http://", "");
+if (directoryPath.indexOf("/") > -1) {
+  directoryPath = directoryPath.substring(directoryPath.indexOf("/"));
+  if (directoryPath.length < 2) {
+    directoryPath = "";
+  }
+}
+
+console.log("directoryPath", directoryPath);
+
+const historySettings = directoryPath ? { basename: directoryPath } : {};
+
+const history = createBrowserHistory(historySettings);
 
 let middlewares = [thunk, routerMiddleware(history)];
 
