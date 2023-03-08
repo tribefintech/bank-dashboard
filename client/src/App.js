@@ -26,8 +26,6 @@ if (directoryPath.indexOf("/") > -1) {
   }
 }
 
-console.log("directoryPath", directoryPath);
-
 const historySettings = directoryPath ? { basename: directoryPath } : {};
 
 const history = createBrowserHistory(historySettings);
