@@ -209,7 +209,7 @@ function AddChart(props) {
       activeDataset.id,
       newDataset
     )
-      .then((dataset) => {
+      .then(async (dataset) => {
         // determine wether to do a full refresh or not
         if (activeDataset.xAxis !== dataset.xAxis
           || activeDataset.yAxis !== dataset.yAxis
@@ -217,7 +217,7 @@ function AddChart(props) {
           || activeDataset.dateField !== dataset.dateField
           || activeDataset.groups !== dataset.groups
         ) {
-          _onRefreshData();
+          _onRefreshData(false, true);
         } else {
           _onRefreshPreview(skipParsing);
         }
@@ -252,8 +252,10 @@ function AddChart(props) {
     const tempChart = {
       pointRadius: typeof pointRadius !== "undefined" ? pointRadius : newChart.pointRadius,
       displayLegend: typeof displayLegend !== "undefined" ? displayLegend : newChart.displayLegend,
-      startDate: dateRange?.startDate || newChart.startDate,
-      endDate: dateRange?.endDate || newChart.endDate,
+      startDate: dateRange?.startDate || dateRange?.startDate === null
+        ? dateRange.startDate : newChart.startDate,
+      endDate: dateRange?.endDate || dateRange?.endDate === null
+        ? dateRange.endDate : newChart.endDate,
       timeInterval: timeInterval || newChart.timeInterval,
       includeZeros: typeof includeZeros !== "undefined" ? includeZeros : newChart.includeZeros,
       currentEndDate: typeof currentEndDate !== "undefined" ? currentEndDate : newChart.currentEndDate,
@@ -308,23 +310,27 @@ function AddChart(props) {
       });
   };
 
-  const _onRefreshData = () => {
+  const _onRefreshData = (skipParsing, skipConfCheck = false) => {
+    if (!match.params.chartId) return;
+
     const getCache = !invalidateCache;
 
-    // check if all datasets are configured properly
-    const datasetsNotConfigured = datasets.filter((dataset) => {
-      if (!dataset.xAxis || !dataset.yAxis) return true;
+    if (!skipConfCheck) {
+      // check if all datasets are configured properly
+      const datasetsNotConfigured = datasets.filter((dataset) => {
+        if (!dataset.xAxis || !dataset.yAxis) return true;
 
-      return false;
-    });
-
-    if (datasetsNotConfigured.length > 0) {
-      datasetsNotConfigured.forEach((dataset) => {
-        toast.error(`Dataset "${dataset.legend}" is not configured properly. Please check the settings.`, {
-          autoClose: 3000,
-        });
+        return false;
       });
-      return;
+
+      if (datasetsNotConfigured.length > 0) {
+        datasetsNotConfigured.forEach((dataset) => {
+          toast.error(`Dataset "${dataset.legend}" is not configured properly. Please check the settings.`, {
+            autoClose: 3000,
+          });
+        });
+        return;
+      }
     }
 
     runQuery(match.params.projectId, match.params.chartId, false, false, getCache)
@@ -347,6 +353,7 @@ function AddChart(props) {
   };
 
   const _onRefreshPreview = (skipParsing = true) => {
+    if (!match.params.chartId) return;
     runQuery(match.params.projectId, match.params.chartId, true, skipParsing, true)
       .then(() => {
         if (conditions.length > 0) {
@@ -746,11 +753,10 @@ function AddChart(props) {
                   size="lg"
                   onClick={() => _onSaveNewDataset()}
                   disabled={savingDataset}
-                  iconRight={<Plus />}
-                  shadow
+                  iconRight={savingDataset ? null : <Plus />}
                   auto
                 >
-                  {savingDataset && <Loading type="points" />}
+                  {savingDataset && <Loading type="points-opacity" />}
                   {!savingDataset && "Add the first dataset"}
                 </Button>
               )}
