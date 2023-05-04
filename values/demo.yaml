@@ -43,16 +43,16 @@ env:
       value: "0.0.0.0"
     - name: CB_API_PORT
       value: "4019"
+    - name: CB_DB_DIALECT
+      value: "postgres"
     - name: CB_DB_HOST
-      value: system
+      value: "demo.cluster-cyapmvolf57x.eu-central-1.rds.amazonaws.com"
     - name: CB_DB_PORT
-      value: system
+      value: "5432"
     - name: CB_DB_NAME
-      value: "chartbrew"
+      value: "bank-dashboard"
     - name: CB_DB_USERNAME
-      value: system
-    - name: CB_DB_USERNAME
-      value: system
+      value: "postgres"
     - name: REACT_APP_CLIENT_HOST
       value: "https://console.demo.tymetribe.com"
     - name: REACT_APP_API_HOST
