@@ -53,6 +53,7 @@ jobs:
           kubectl -n $TARGET_ENV create secret generic $APP_NAME-secret \
             --from-literal=CB_SECRET=${{ secrets.CB_SECRET }} \
             --from-literal=CB_DB_PASSWORD=${{ secrets.CB_DB_PASSWORD }} \
+            --from-literal=CB_MAIL_PASS=${{ secrets.CB_MAIL_PASS }} \
             --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Deploy

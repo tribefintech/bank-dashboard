@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bank-dashboard-api
+  namespace: demo
+  labels:
+    app: bank-dashboard-api
+    version: f6de1809
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+  - host: console-api.demo.tymetribe.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: bank-dashboard-api
+            port:
+              number: 4019

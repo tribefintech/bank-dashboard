@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bank-dashboard-api
+  namespace: demo
+  labels:
+    app: bank-dashboard-api
+    version: f6de1809
+spec:
+  type: ClusterIP
+  ports:
+    - port: 4019
+      targetPort: 4019
+      protocol: TCP
+      name: http
+  selector:
+    app: bank-dashboard
