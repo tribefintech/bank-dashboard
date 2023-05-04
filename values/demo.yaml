@@ -1,0 +1,70 @@
+replicaCount: 2
+
+image:
+  repository: razvanilin/chartbrew
+  tag: latest
+  pullPolicy: Always
+
+appName: bank-dashboard
+namespace: demo
+fullnameOverride: "bank-dashboard"
+
+healthcheck: /
+
+service:
+  type: ClusterIP
+  port: 4018
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  hosts:
+    - host: console.demo.tymetribe.com
+      paths:
+        - path: /
+
+resources:
+   requests:
+     cpu: 200m
+     memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+nodeSelector: {}
+
+env:
+  enabled: true
+  data:
+    - name: CB_API_HOST
+      value: "0.0.0.0"
+    - name: CB_API_PORT
+      value: "4019"
+    - name: CB_DB_DIALECT
+      value: "postgres"
+    - name: CB_DB_HOST
+      value: "demo.cluster-cyapmvolf57x.eu-central-1.rds.amazonaws.com"
+    - name: CB_DB_PORT
+      value: "5432"
+    - name: CB_DB_NAME
+      value: "bank-dashboard"
+    - name: CB_DB_USERNAME
+      value: "postgres"
+    - name: CB_MAIL_HOST
+      value: "email-smtp.eu-central-1.amazonaws.com"
+    - name: CB_MAIL_USER
+      value: "AKIA6LYHUHJOTHDJ4QWG"
+    - name: CB_MAIL_PORT
+      value: "465"
+    - name: CB_MAIL_SECURE
+      value: "false"
+    - name: CB_ADMIN_MAIL
+      value: "console@my.tymetribe.com"
+    - name: REACT_APP_CLIENT_HOST
+      value: "https://console.demo.tymetribe.com"
+    - name: REACT_APP_API_HOST
+      value: "https://console-api.demo.tymetribe.com"
