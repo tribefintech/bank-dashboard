@@ -2,6 +2,10 @@ name: Deploy to Demo
 
 on: [workflow_dispatch]
 
+env:
+  TARGET_ENV: demo
+  APP_NAME: bank-dashboard
+
 jobs:
   deploy-demo:
     runs-on: ubuntu-latest
