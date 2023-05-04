@@ -1,0 +1,59 @@
+replicaCount: 2
+
+image:
+  repository: razvanilin/chartbrew
+  pullPolicy: Always
+
+appName: bank-dashboard
+namespace: demo
+fullnameOverride: "bank-dashboard"
+
+healthcheck: /
+
+service:
+  type: ClusterIP
+  port: 4018
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  hosts:
+    - host: console.demo.tymetribe.com
+      paths:
+        - path: /
+
+resources:
+   requests:
+     cpu: 200m
+     memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+nodeSelector: {}
+
+env:
+  enabled: true
+  data:
+    - name: CB_API_HOST
+      value: "0.0.0.0"
+    - name: CB_API_PORT
+      value: "4019"
+    - name: CB_DB_HOST
+      value: system
+    - name: CB_DB_PORT
+      value: system
+    - name: CB_DB_NAME
+      value: "chartbrew"
+    - name: CB_DB_USERNAME
+      value: system
+    - name: CB_DB_USERNAME
+      value: system
+    - name: REACT_APP_CLIENT_HOST
+      value: "https://console.demo.tymetribe.com"
+    - name: REACT_APP_API_HOST
+      value: "https://console-api.demo.tymetribe.com"

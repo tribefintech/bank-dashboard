@@ -1,0 +1,57 @@
+name: Deploy to Demo
+
+on: [workflow_dispatch]
+
+jobs:
+  deploy-demo:
+    runs-on: ubuntu-latest
+    environment:
+      name: demo
+    steps:
+      - name: Checkout app repo
+        uses: actions/checkout@v2
+
+      - name: Checkout helm repo
+        uses: actions/checkout@v2
+        with:
+          ssh-key: ${{ secrets.HELM_DEPLOY_KEY }}
+          ref: main
+          repository: tribefintech/helm
+          path: helm
+
+      - name: Add SHORT_SHA env property with commit short sha
+        run: |
+          echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
+
+      - name: Configure AWS Credentials for EKS
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: AKIA6LYHUHJOZW5QIBMS
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+
+      - name: Replace version
+        run: |
+          sed -i "s/G_APP_VERSION/${{ env.SHORT_SHA }}/g" helm/nodejs/Chart.yaml
+          cat helm/nodejs/Chart.yaml
+
+      - name: Config kubeconfig
+        run: |
+          aws eks update-kubeconfig --region eu-central-1 --name prod
+
+      - name: Create secret
+        run: |
+          kubectl -n $TARGET_ENV create secret generic $APP_NAME-secret \
+            --from-literal=CB_SECRET=${{ secrets.CB_SECRET }} \
+            --from-literal=CB_DB_PASSWORD=${{ secrets.CB_DB_PASSWORD }} \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Deploy
+        run: |
+          cd helm/nodejs
+          helm upgrade --install api . -f ../../values/demo.yaml -n demo
